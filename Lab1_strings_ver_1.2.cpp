@@ -89,18 +89,18 @@ void process(strm& a, int o_pos, int n_pos)
 /// <returns></returns>
 bool inp(strm& a) {
     int file_num = 1;
-    std::ifstream file("C:\\Users\\Анечка\\Documents\\in1.txt", std::ios::in);
+    std::ifstream file("C:\\Users\\Анечка\\Documents\\in2.txt", std::ios::in);
     std::ofstream out("C:\\Users\\Анечка\\Documents\\out2.txt", std::ios::out);
 
-    char stop;
     char c;
 
     if (!file.is_open()) {
         std::cout << "Ошибка открытия входного файла";
+        outp("Ошибка открытия входного файла", "", ' ');
         return false;
     }
     if (!out.is_open()) {
-        std::cout << "Ошибка открытия выходного файла";
+        outp("Ошибка открытия выходного файла", "", ' ');
         return false;
     }
 
@@ -117,27 +117,77 @@ bool inp(strm& a) {
             outp("----------------", "", ' ');
             continue;
         }
+        //массив числа - количества считываемых из строки символов
+        char num[4];
 
-        file.get(stop);
-        if (stop == '\n') {
-            outp("Ошибка - нет ограничителя", "", ' ');
-            file_num++;
-            outp("----------------", "", ' ');
-            continue;
+        //--------
+        int j = 0;
+        char temp;
+        while (file.get(temp) || j < 3) {
+            if (temp >= '0' && temp <= '9') {
+                num[j] = temp;  // Сохраняем в массив
+                j++;
+            }
+            else {
+                file.putback(temp);  // Возвращаем нецифровой символ обратно!
+                num[j] = '\0';
+                break;
+            }
+            num[j] = '\0';
         }
+
+
+        if (j == 0) {
+            outp("Ошибка: нет числа", "", ' ');
+            
+        }
+
+        // Проверка на ведущий ноль (кроме числа "0")
+        if (num[0] == '0') {
+            outp("Ошибка: неверное число (ведущий ноль)", "", ' ');
+            return 0;
+        }
+
+        //// Проверка, что после числа есть строка
+        //if (file.get(temp) == '\n') {
+        //    std::cout << "Ошибка: нет строки после числа" << std::endl;
+        //    return 0;
+        //}
+
+        // Парсинг числа вручную
+        unsigned number = 0;
+        for (int jj = 0; jj < j; jj++) {
+            number = number * 10 + (num[jj] - '0');
+        }
+
+        // Проверка диапазона [0, 100]
+        if (number > 100) {
+            outp("Ошибка: число > 100", "", ' ');
+            return 0;
+        }
+
+        //--------
+
+
+
+        
 
         unsigned i = 0;
         bool flag = false;
 
         while (file.get(c)) {
-            if (c == stop || c == a.mark) break;
+            if (c == a.mark) break;
             if (c == '\n' || file.eof()) {
                 file_num++;
-                outp("Ошибка - в строке нет маркера и ограничителя", "", ' ');
+                outp("Ошибка - в строке нет маркера", "", ' ');
                 outp("----------------", "", ' ');
                 flag = true;
                 break;
 
+            }
+            if (i > number) {
+                outp("В строке символов больше нужного", "", ' ');
+                break;
             }
 
             a.A[i] = c;
@@ -174,8 +224,9 @@ bool inp(strm& a) {
             a.A[i + 1] = '\0';
         }
 
+        
         outp("Маркер: ", "", a.mark);
-        outp("Ограничитель: ", "", stop);
+        outp("Длина считываемой строки :", num, ' ');
         outp("Строка: ", a.A, ' ');
 
         while (file.get(c)) {
