@@ -142,12 +142,12 @@ bool inp(strm& a) {
         }
 
         std::cout << num << " " << j << std::endl;
-        
+
         if (j == 0) {
             outp("Ошибка: нет числа", "", ' ');
             file_num++;
             outp("----------------", "", ' ');
-            
+
             while (file.get(c)) {
                 if (c == '\n') break;
                 if (file.eof()) return true;
@@ -178,37 +178,43 @@ bool inp(strm& a) {
             }
             continue;
         }
-        
+
         // Парсинг числа вручную
         unsigned number = 0;
         for (int jj = 0; jj < j; jj++) {
             number = number * 10 + (num[jj] - '0');
         }
 
+        bool flag = false;
+        // для ситуаций, где символов в строке меньше нужного
+
         // Проверка диапазона [0, 100]
         if (number > 100) {
             outp("Ошибка: число > 100", "", ' ');
-            return 0;
+            file_num++;
+            outp("----------------", "", ' ');
+
+            flag = true;
         }
 
         //--------
 
 
 
-        
+
 
         unsigned i = 0;
         //для ошибок - чтобы пропустить остаток и идти дальше
-        bool flag = false;
-        // для ситуаций, где символов в строке меньше нужного
-        bool flag2 = true;
         
+        bool flag2 = true;
+
 
         while (file.get(c)) {
             if (c == a.mark) break;
             if (c == '\n' || file.eof()) {
-                file_num++;
                 outp("Ошибка - в строке нет маркера", "", ' ');
+
+                file_num++;                
                 outp("----------------", "", ' ');
                 flag = true;
                 flag2 = false;
@@ -233,7 +239,7 @@ bool inp(strm& a) {
             }
 
         }
-        
+
 
         //Пропускает остаток строки и переходит на следующую строчку
         if (flag) {
@@ -254,15 +260,15 @@ bool inp(strm& a) {
             flag2 = false;
             a.A[i] = a.mark;
         }
-        if (i < N) {            
+        if (i < N) {
             a.A[i] = a.mark;
             a.A[i + 1] = '\0';
         }
         if (flag2) {
             outp("В строке символов меньше нужного, так что считываем все", "", ' ');
         }
-        
-        
+
+
         outp("Маркер: ", "", a.mark);
         outp("Длина считываемой строки: ", num, ' ');
         outp("Строка: ", a.A, ' ');
@@ -287,6 +293,8 @@ bool inp(strm& a) {
     file.close();
     return true;
 }
+
+
 
 int main() {
     setlocale(LC_ALL, "ru");
