@@ -122,38 +122,63 @@ bool inp(strm& a) {
 
         //--------
         int j = 0;
-        char temp;
-        while (file.get(temp) || j < 3) {
-            if (temp >= '0' && temp <= '9') {
-                num[j] = temp;  // Сохраняем в массив
+        while (file.get(c) || j < 3) {
+            if (c >= '0' && c <= '9') {
+                num[j] = c;
                 j++;
             }
+            else if (c == '-') {
+                //сохраняем в массив минус, чтобы потом его увидеть и поругаться
+                num[j] = c;
+                j++;
+                continue;
+            }
             else {
-                file.putback(temp);  // Возвращаем нецифровой символ обратно!
+                file.putback(c);  // Возвращаем нецифровой символ обратно!
                 num[j] = '\0';
                 break;
             }
             num[j] = '\0';
         }
 
-
+        std::cout << num << " " << j << std::endl;
+        
         if (j == 0) {
             outp("Ошибка: нет числа", "", ' ');
+            file_num++;
+            outp("----------------", "", ' ');
             
+            while (file.get(c)) {
+                if (c == '\n') break;
+                if (file.eof()) return true;
+            }
+            continue;
         }
 
         // Проверка на ведущий ноль (кроме числа "0")
         if (num[0] == '0') {
             outp("Ошибка: неверное число (ведущий ноль)", "", ' ');
-            return 0;
+            file_num++;
+            outp("----------------", "", ' ');
+
+            while (file.get(c)) {
+                if (c == '\n') break;
+                if (file.eof()) return true;
+            }
+            continue;
         }
+        if (num[0] == '-') {
+            outp("Ошибка: неверное число (отрицательное значение)", "", ' ');
+            file_num++;
+            outp("----------------", "", ' ');
 
-        //// Проверка, что после числа есть строка
-        //if (file.get(temp) == '\n') {
-        //    std::cout << "Ошибка: нет строки после числа" << std::endl;
-        //    return 0;
-        //}
-
+            while (file.get(c)) {
+                if (c == '\n') break;
+                if (file.eof()) return true;
+            }
+            continue;
+        }
+        
         // Парсинг числа вручную
         unsigned number = 0;
         for (int jj = 0; jj < j; jj++) {
@@ -173,7 +198,11 @@ bool inp(strm& a) {
         
 
         unsigned i = 0;
+        //для ошибок - чтобы пропустить остаток и идти дальше
         bool flag = false;
+        // для ситуаций, где символов в строке меньше нужного
+        bool flag2 = true;
+        
 
         while (file.get(c)) {
             if (c == a.mark) break;
@@ -182,11 +211,13 @@ bool inp(strm& a) {
                 outp("Ошибка - в строке нет маркера", "", ' ');
                 outp("----------------", "", ' ');
                 flag = true;
+                flag2 = false;
                 break;
 
             }
             if (i > number) {
                 outp("В строке символов больше нужного", "", ' ');
+                flag2 = false;
                 break;
             }
 
@@ -197,10 +228,12 @@ bool inp(strm& a) {
                 file_num++;
                 outp("----------------", "", ' ');
                 flag = true;
+                flag2 = false;
                 break;
             }
 
         }
+        
 
         //Пропускает остаток строки и переходит на следующую строчку
         if (flag) {
@@ -213,20 +246,25 @@ bool inp(strm& a) {
 
         if (i == 0) {
             outp("Ошибка - пустая строка", "", ' ');
+            flag2 = false;
             return 0;
         }
         if (i == N) {
             outp("В строке ровно 100 символов", "", ' ');
+            flag2 = false;
             a.A[i] = a.mark;
         }
-        if (i < N) {
+        if (i < N) {            
             a.A[i] = a.mark;
             a.A[i + 1] = '\0';
         }
-
+        if (flag2) {
+            outp("В строке символов меньше нужного, так что считываем все", "", ' ');
+        }
+        
         
         outp("Маркер: ", "", a.mark);
-        outp("Длина считываемой строки :", num, ' ');
+        outp("Длина считываемой строки: ", num, ' ');
         outp("Строка: ", a.A, ' ');
 
         while (file.get(c)) {
