@@ -14,10 +14,10 @@ struct strm { char mark; char A[N + 1]; };
 void outp(const char* text, const char* str, char c)
 {
     std::ofstream file("C:\\Users\\Анечка\\Documents\\out2.txt", std::ios::app);
-
+    //Если есть строка на ввод, то читаем либо всю (101 символ), либо до ее назначенного конца
     if (str != "") {
         file << text;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 101; i++) {
             if (str[i] == '\0') {
                 file << std::endl;
                 file.close();
@@ -55,7 +55,6 @@ void swap(strm& a, int len)
 /// <returns></returns>
 int poisk_pos(strm& a) {
     int o_pos = 0;
-
     while (a.A[o_pos] != '\0')
     {
         if (a.A[o_pos] == a.mark) {
@@ -66,7 +65,7 @@ int poisk_pos(strm& a) {
 }
 
 /// <summary>
-/// Основная работа программы - перемещение символов в строке
+/// Основная работа программы - перемещение символов в строке + вывод результата с помощью outp
 /// </summary>
 /// <param name="a"> - структура {маркер ; строка с маркером} </param>
 /// <param name="o_pos"> - old marker position (конец строки)</param>
@@ -109,7 +108,6 @@ bool inp(strm& a) {
         char n = file_num + '0';
         outp("Cтрока №", "", n);
 
-
         file.get(a.mark);
         if (a.mark == '\n') {
             outp("Ошибка - пустая строка", "", ' ');
@@ -120,7 +118,7 @@ bool inp(strm& a) {
         //массив числа - количества считываемых из строки символов
         char num[4];
 
-        //--------
+        //Дальше идет считывание числа - количество читаемых символов из строки
         int j = 0;
         while (file.get(c) || j < 3) {
             if (c >= '0' && c <= '9') {
@@ -134,15 +132,14 @@ bool inp(strm& a) {
                 continue;
             }
             else {
-                file.putback(c);  // Возвращаем нецифровой символ обратно!
+                file.putback(c);
                 num[j] = '\0';
                 break;
             }
             num[j] = '\0';
         }
 
-        std::cout << num << " " << j << std::endl;
-
+        //не совершили j++ => не записали ничего в массив
         if (j == 0) {
             outp("Ошибка: нет числа", "", ' ');
             file_num++;
@@ -155,7 +152,6 @@ bool inp(strm& a) {
             continue;
         }
 
-        // Проверка на ведущий ноль (кроме числа "0")
         if (num[0] == '0') {
             outp("Ошибка: неверное число (ведущий ноль)", "", ' ');
             file_num++;
@@ -167,6 +163,7 @@ bool inp(strm& a) {
             }
             continue;
         }
+
         if (num[0] == '-') {
             outp("Ошибка: неверное число (отрицательное значение)", "", ' ');
             file_num++;
@@ -179,67 +176,53 @@ bool inp(strm& a) {
             continue;
         }
 
-        // Парсинг числа вручную
         unsigned number = 0;
         for (int jj = 0; jj < j; jj++) {
             number = number * 10 + (num[jj] - '0');
         }
 
+        //для ошибок - чтобы пропустить остаток и идти дальше
         bool flag = false;
-        // для ситуаций, где символов в строке меньше нужного
-
+        
         // Проверка диапазона [0, 100]
         if (number > 100) {
-            outp("Ошибка: число > 100", "", ' ');
-            file_num++;
+            outp("Ошибка: число > 100", "", ' ');            
             outp("----------------", "", ' ');
-
+            file_num++;
             flag = true;
         }
 
-        //--------
-
-
-
-
-
         unsigned i = 0;
-        //для ошибок - чтобы пропустить остаток и идти дальше
-        
-        bool flag2 = true;
 
+        // для ситуаций, где символов в строке меньше нужного
+        bool flag2 = true;
 
         while (file.get(c)) {
             if (c == a.mark) break;
             if (c == '\n' || file.eof()) {
-                outp("Ошибка - в строке нет маркера", "", ' ');
-
-                file_num++;                
+                outp("Ошибка - в строке нет маркера", "", ' ');             
                 outp("----------------", "", ' ');
+                file_num++;
                 flag = true;
                 flag2 = false;
                 break;
-
             }
             if (i > number) {
                 outp("В строке символов больше нужного", "", ' ');
                 flag2 = false;
                 break;
             }
-
             a.A[i] = c;
             i++;
             if (i > N) {
                 outp("Ошибка - в строке больше 100 символов", "", ' ');
-                file_num++;
                 outp("----------------", "", ' ');
+                file_num++;
                 flag = true;
                 flag2 = false;
                 break;
             }
-
         }
-
 
         //Пропускает остаток строки и переходит на следующую строчку
         if (flag) {
@@ -268,7 +251,6 @@ bool inp(strm& a) {
             outp("В строке символов меньше нужного, так что считываем все", "", ' ');
         }
 
-
         outp("Маркер: ", "", a.mark);
         outp("Длина считываемой строки: ", num, ' ');
         outp("Строка: ", a.A, ' ');
@@ -280,13 +262,11 @@ bool inp(strm& a) {
 
         file_num++;
 
-
         int o_pos = poisk_pos(a);
         int n_pos = (poisk_pos(a)) / 2 + (poisk_pos(a)) % 2;
         process(a, o_pos, n_pos);
 
         outp("----------------", "", ' ');
-
 
     }
     out.close();
