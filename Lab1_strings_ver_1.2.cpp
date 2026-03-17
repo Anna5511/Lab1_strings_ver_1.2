@@ -11,9 +11,15 @@ struct strm { char mark; char A[N + 1]; };
 /// <param name="text"> - сообщение</param>
 /// <param name="str"> - строка на вывод</param>
 /// <param name="c"> - символ на вывод</param>
-void outp(const char* text, const char* str, char c)
+bool outp(const char* text, const char* str, char c)
 {
     std::ofstream file("C:\\Users\\Анечка\\Documents\\out2.txt", std::ios::app);
+
+    if (!file.is_open()) {
+        outp("Ошибка открытия выходного файла", "", ' ');
+        return false;
+    }
+
     //Если есть строка на ввод, то читаем либо всю (101 символ), либо до ее назначенного конца
     if (str != "") {
         file << text;
@@ -32,6 +38,7 @@ void outp(const char* text, const char* str, char c)
     }
 
     file.close();
+    return true;
 }
 
 /// <summary>
@@ -89,7 +96,6 @@ void process(strm& a, int o_pos, int n_pos)
 bool inp(strm& a) {
     int file_num = 1;
     std::ifstream file("C:\\Users\\Анечка\\Documents\\in2.txt", std::ios::in);
-    std::ofstream out("C:\\Users\\Анечка\\Documents\\out2.txt", std::ios::out);
 
     char c;
 
@@ -98,10 +104,7 @@ bool inp(strm& a) {
         outp("Ошибка открытия входного файла", "", ' ');
         return false;
     }
-    if (!out.is_open()) {
-        outp("Ошибка открытия выходного файла", "", ' ');
-        return false;
-    }
+    
 
     //читает построчно файл, считывает маркеты и ограничители, читает строки, если что-то не так, то выдает ошибки
     while (!(file.eof())) {
@@ -269,7 +272,6 @@ bool inp(strm& a) {
         outp("----------------", "", ' ');
 
     }
-    out.close();
     file.close();
     return true;
 }
