@@ -1,216 +1,223 @@
 ﻿#include <iostream>
-#include <iomanip>
 #include <fstream>
+#include <sstream>
+#include <cstring>
 
 const unsigned N = 100;
-struct strm { int len; char A[N]; };
+struct strm {
+    int len;
+    char A[N];
+};
 
 void clear_File() {
     std::ofstream File("C:\\Users\\Анечка\\Documents\\out2.txt", std::ios::trunc);
     File.close();
 }
 
-void outp(const char* text, const char* str, char symbol, int len)
-{
+void outp(const char* text, const char* str, char symbol, int len) {
     std::ofstream file("C:\\Users\\Анечка\\Documents\\out2.txt", std::ios::app);
-    if (len > 0) {
-        file << text;
-        for (int i = 0; i < len; i++) {
-            file << str[i];
-        }
-        file << std::endl;
+    file << text;
+    if (len > 0 && str) {
+        for (int i = 0; i < len; i++) file << str[i];
+    }
+    else if (str && str[0] != '\0') {
+        file << str;
     }
     else {
-        file << text << symbol << std::endl;
+        file << symbol;
     }
+    file << std::endl;
     file.close();
 }
+
 void outp_n(const char* text, int n) {
     std::ofstream file("C:\\Users\\Анечка\\Documents\\out2.txt", std::ios::app);
-    //if (n != 0) file << "-------------------" << std::endl;
     file << text << n << std::endl;
     file.close();
 }
 
 void swap(strm& a) {
+    if (a.len <= 1) return;
     char temp = a.A[0];
-    for (int i = 0; i < a.len; i++) {
-        a.A[i] = a.A[i + 1];
-    }
-    a.A[a.len] = temp;
+    for (int i = 0; i < a.len - 1; i++) a.A[i] = a.A[i + 1];
+    a.A[a.len - 1] = temp;
 }
 
 void process(strm& a) {
+    if (a.len <= 0) return;
     int pos_count = a.len / 2 + a.len % 2;
     outp_n("Сколько раз свапаем : ", pos_count);
     outp_n("Длина свапаемой строки : ", a.len);
-    outp("Строка до свапа : ", a.A, ' ', a.len);
-    for (int i = 0; i < pos_count; i++) {
-        swap(a);
-    }
+    for (int i = 0; i < pos_count; i++) swap(a);
     outp("Результат : ", a.A, ' ', a.len);
 }
 
-void skipToNextLine(std::ifstream& file) {
-    char c;
-    while (file.get(c)) {
-        if (c == '\n') break;
-    }
-}
-
-bool readLine(std::ifstream& file, strm& a) {
-    char c = ' ';
-    char stop;
-    // Читаем ограничитель
-    if (!file.get(stop)) {
-        outp("Ошибка: Пустой входной файл", "", ' ', 0);
-        return false;
-    }
-    if (stop == '\n') {
+// Парсит строку и заполняет структуру
+// Возвращает true если успешно, false если ошибка
+bool parseLine(const std::string& line, strm& a) {
+    if (line.empty()) {
         outp("Ошибка: Пустая строка (нет ограничителя)", "", ' ', 0);
         return false;
     }
 
-    ///////////////////////////////////
-    char num[4];
+    // Первый символ - ограничитель
+    char stop = line[0];
 
-    //Дальше идет считывание числа - количество читаемых символов из строки
-    int j = 0;
-    while (file.get(c) && j < 3) {
-        if (c >= '0' && c <= '9') {
-            num[j] = c;
-            j++;
-        }
-        else if (c == '-') {
-            //сохраняем в массив минус, чтобы потом его увидеть и поругаться
-            num[j] = c;
-            j++;
-            continue;
-        }
-        else {
-            file.putback(c);
-            num[j] = '\0';
-            break;
-        }
-        
-    }
-
-    //не совершили j++ => не записали ничего в массив
-    if (j == 0) {
-        outp("Ошибка: нет числа", "", ' ', 0);
+    // Проверяем, не является ли первый символ переводом строки
+    if (stop == '\n' || stop == '\r') {
+        outp("Ошибка: Пустая строка (нет ограничителя)", "", ' ', 0);
         return false;
     }
 
-    if (num[0] == '0') {
-        outp("Ошибка: неверное число (ведущий ноль)", "", ' ', 0);
-        return false;
-    }
-
-    if (num[0] == '-') {
-        outp("Ошибка: неверное число (отрицательное значение)", "", ' ', 0);
-        return false;
-    }
-
+    // Читаем число после ограничителя
     unsigned number = 0;
-    for (int jj = 0; jj < j; jj++) {
-        number = number * 10 + (num[jj] - '0');
+    int pos = 1; // позиция после ограничителя
+
+    // Пропускаем пробелы/табы
+    while (pos < line.length() && (line[pos] == ' ' || line[pos] == '\t')) {
+        pos++;
     }
 
-    // Проверка диапазона [0, N]
-    if (number > N) {
-        outp("Ошибка: число > N", "", ' ', 0);
-        return 0;
+    // Читаем цифры
+    int numStart = pos;
+    while (pos < line.length() && line[pos] >= '0' && line[pos] <= '9') {
+        pos++;
     }
 
-    //////////////////////////////////
+    // Проверка: есть ли цифры
+    if (pos == numStart) {
+        outp("Ошибка: нет числа или неверный формат", "", ' ', 0);
+        return false;
+    }
+
+    // Парсим число
+    std::string numStr = line.substr(numStart, pos - numStart);
+
+    // Проверка на ведущий ноль
+    if (numStr[0] == '0' && numStr.length() > 1) {
+        outp("Ошибка: нет числа или неверный формат", "", ' ', 0);
+        return false;
+    }
+
+    try {
+        number = std::stoul(numStr);
+    }
+    catch (...) {
+        outp("Ошибка: нет числа или неверный формат", "", ' ', 0);
+        return false;
+    }
+
+    // Валидация диапазона: 1..100
+    if (number < 1 || number > 100) {
+        outp("Ошибка: нет числа или неверный формат", "", ' ', 0);
+        return false;
+    }
+
     outp_n("Количество символов (предполагаемо): ", number);
     outp("Ограничитель : ", "", stop, 0);
 
-    // Читаем строку до ограничителя
+    // Читаем полезные данные до ограничителя
     unsigned i = 0;
+    bool stopFound = false;
 
-    while (file.get(c) && c != '\n' && (!file.eof())) {
+    while (pos < line.length() && i < N) {
+        char c = line[pos];
 
+        // Проверка на ограничитель
         if (c == stop) {
-            skipToNextLine(file);
-            outp_n("1) Количество символов: ", i);
-            a.len = i;
-            return true;
+            stopFound = true;
+            break;
         }
-        a.A[i] = c;
-        i++;
+
+        a.A[i++] = c;
+        pos++;
+
+        // Достигли ожидаемого количества
         if (i == number) {
-            outp("В строке взято только нужное количество символов", "", ' ', 0);
-            a.len = number-1;
-            outp_n("2) Количество символов: ", number);
-            skipToNextLine(file);
             break;
         }
     }
+
+    // Проверка: есть ли символы
     if (i == 0) {
         outp("В строке нет символов", "", ' ', 0);
         return false;
     }
-    if (number > i){
+
+    a.len = i;
+
+    // Сообщения согласно ТЗ
+    if (!stopFound && i == N) {
+        // Достигли лимита 100 без ограничителя - ок по ТЗ
+    }
+    else if (number > i) {
         outp("В строке символов меньше нужного, так что считали все", "", ' ', 0);
-        a.len = i;
-        outp_n("3) Количество символов: ", i);
     }
 
-
-    if (!file.eof()) return true;
+    outp_n("Количество символов: ", i);
+    return true;
 }
 
-bool out_file_check() {
-    std::ifstream file("C:\\Users\\Анечка\\Documents\\out2.txt");
-    if (!file.is_open()) {
-        std::cout << "Ошибка открытия выходного файла";
-        file.close();
-        return true;
-    }
-    else {
-        file.close();
-        return false;
-    }
-}
 bool in_file_check() {
     std::ifstream file("C:\\Users\\Анечка\\Documents\\in2.txt");
     if (!file.is_open()) {
-        outp("Ошибка открытия входного файла", "", ' ', 0);
-        file.close();
+        std::ofstream out("C:\\Users\\Анечка\\Documents\\out2.txt", std::ios::app);
+        out << "Ошибка открытия входного файла" << std::endl;
+        out.close();
         return true;
     }
-    else {
-        file.close();
-        return false;
-    }
+    file.close();
+    return false;
 }
 
-int main()
-{
+int main() {
     clear_File();
     setlocale(LC_ALL, "ru");
     if (in_file_check()) return 0;
-    if (out_file_check()) return 0;
-
 
     std::ifstream file("C:\\Users\\Анечка\\Documents\\in2.txt");
+    if (!file.is_open()) return 0;
+
     int lineNumber = 0;
+    std::string line;
+    char c;
 
-    // Основной цикл обработки
-    while (!file.eof()) {
-        strm string;
+    // Читаем посимвольно, собирая строки
+    while (file.get(c)) {
+        if (c == '\n') {
+            // Обработка собранной строки
+            if (!line.empty() && line.back() == '\r') line.pop_back();
 
-        for (int i = 0; i < N; i++) {
-            string.A[i] = '\0';
+            strm string = { 0, {0} };
+            memset(string.A, 0, N);
+
+            outp_n("-------------- Номер строки: ", lineNumber);
+            if (parseLine(line, string)) {
+                process(string);
+            }
+
+            lineNumber++;
+            line.clear(); // очищаем для следующей строки
         }
-        string.len = '\0';
+        else {
+            line += c;
+        }
+    }
+
+    // 🔥 Обработка последней строки, если файл не закончился на \n
+    if (!line.empty() || file.eof()) {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+
+        strm string = { 0, {0} };
+        memset(string.A, 0, N);
 
         outp_n("-------------- Номер строки: ", lineNumber);
-
-        if (readLine(file, string)) process(string);
+        if (parseLine(line, string)) {
+            process(string);
+        }
         lineNumber++;
     }
 
+    file.close();
     return 0;
 }
