@@ -1,7 +1,5 @@
 ﻿#include <iostream>
 #include <fstream>
-#include <sstream>
-#include <cstring>
 
 const unsigned N = 100;
 struct strm {
@@ -204,12 +202,13 @@ int main() {
         }
     }
 
-    // 🔥 Обработка последней строки, если файл не закончился на \n
     if (!line.empty() || file.eof()) {
         if (!line.empty() && line.back() == '\r') line.pop_back();
 
-        strm string = { 0, {0} };
-        memset(string.A, 0, N);
+        for (int i = 0; i < N; i++) {
+            string.A[i] = '\0';
+        }
+        string.len = '\0';
 
         outp_n("-------------- Номер строки: ", lineNumber);
         if (parseLine(line, string)) {
