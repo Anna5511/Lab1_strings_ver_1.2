@@ -87,15 +87,13 @@ bool readLine(std::ifstream& file, strm& a) {
         if (c >= '0' && c <= '9') {
             num[j] = c;
             j++;
-            outp_n("", 1);
         }
         else if (c == '-') {
             outp_t("Ошибка: неверное число (отрицательное значение)");
             return false;
         }
         else {
-            file.putback(c);
-            outp_n("", -1);
+            file.seekg(-1, std::ios::cur);
             break;
         }
     }
@@ -133,9 +131,9 @@ bool readLine(std::ifstream& file, strm& a) {
     while (file.get(c) && c != '\n' && (!file.eof())) {
 
         if (c == stop) {
-            skipToNextLine(file);
-            outp_n("Количество символов: ", i);
             a.len = i;
+            outp_n("Количество символов: ", a.len);
+            skipToNextLine(file);
             return true;
         }
         a.A[i] = c;
@@ -143,7 +141,7 @@ bool readLine(std::ifstream& file, strm& a) {
         if (i == number) {
             outp_t("В строке взято только нужное количество символов");
             a.len = number - 1;
-            outp_n("Количество символов: ", number);
+            outp_n("Количество символов: ", a.len);
             skipToNextLine(file);
             break;
         }
@@ -155,7 +153,7 @@ bool readLine(std::ifstream& file, strm& a) {
     if (number > i) {
         outp_t("В строке символов меньше нужного, так что считали все");
         a.len = i;
-        outp_n("3) Количество символов: ", i);
+        outp_n("Количество символов: ", a.len);
     }
 
 
@@ -199,16 +197,11 @@ int main() {
     strm string;
     char c;
 
-    // Читаем посимвольно, собирая строки
-    while (file.get(c)) {
-        if (c == '\n') {
+    while (! file.eof()) {
             outp_n("-------------- Номер строки: ", lineNumber);
             if (readLine(file, string)) process(string);
             lineNumber++;
-        }
     }
-
-
 
     file.close();
     return 0;
