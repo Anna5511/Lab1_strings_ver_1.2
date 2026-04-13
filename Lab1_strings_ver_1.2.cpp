@@ -51,7 +51,7 @@ void swap(strm& a) {
 
 void process(strm& a) {
     if (a.len <= 0) return;
-    int pos_count = a.len / 2 + a.len % 2;
+    int pos_count = a.len / 2;
     outp_n("Сколько раз свапаем : ", pos_count);
     outp_n("Длина свапаемой строки : ", a.len);
     outp("Строка до свапа : ", ' ', a);
@@ -61,9 +61,7 @@ void process(strm& a) {
 
 void skipToNextLine(std::ifstream& file) {
     char c;
-    while (file.get(c)) {
-        if (c == '\n') break;
-    }
+    while (file.get(c) && c != '\n');
 }
 
 bool readLine(std::ifstream& file, strm& a) {
@@ -78,8 +76,10 @@ bool readLine(std::ifstream& file, strm& a) {
         outp_t("Ошибка: Пустая строка (нет ограничителя)");
         return false;
     }
+    outp("Ограничитель : ", stop, a);
     ///////////////////////////////////
     char num[4] = { 0 };
+    
     
     //Дальше идет считывание числа - количество читаемых символов из строки
     int j = 0;
@@ -90,6 +90,7 @@ bool readLine(std::ifstream& file, strm& a) {
         }
         else if (c == '-') {
             outp_t("Ошибка: неверное число (отрицательное значение)");
+            skipToNextLine(file);
             return false;
         }
         else {
@@ -101,14 +102,17 @@ bool readLine(std::ifstream& file, strm& a) {
     //не совершили j++ => не записали ничего в массив
     if (j == 0) {
         outp_t("Ошибка: нет числа");
+        skipToNextLine(file);
         return false;
     }
+
+
 
     if (num[0] == '0') {
         outp_t("Ошибка: неверное число (ведущий ноль)");
+        skipToNextLine(file);
         return false;
     }
-
     unsigned number = 0;
     for (int jj = 0; jj < j; jj++) {
         number = number * 10 + (num[jj] - '0');
@@ -117,11 +121,12 @@ bool readLine(std::ifstream& file, strm& a) {
 
     //////////////////////////////////
     outp_n("Количество символов (предполагаемо): ", number);
-    outp("Ограничитель : ", stop, a);
+    
 
     // Проверка диапазона [0, N]
     if (number > N) {
         outp_t("Ошибка: число > N");
+        skipToNextLine(file);
         return 0;
     }
 
@@ -129,18 +134,17 @@ bool readLine(std::ifstream& file, strm& a) {
     unsigned i = 0;
 
     while (file.get(c) && c != '\n' && (!file.eof())) {
-
         if (c == stop) {
             a.len = i;
             outp_n("Количество символов: ", a.len);
             skipToNextLine(file);
-            return true;
+            break;
         }
         a.A[i] = c;
         i++;
         if (i == number) {
             outp_t("В строке взято только нужное количество символов");
-            a.len = number - 1;
+            a.len = number;
             outp_n("Количество символов: ", a.len);
             skipToNextLine(file);
             break;
@@ -153,11 +157,11 @@ bool readLine(std::ifstream& file, strm& a) {
     if (number > i) {
         outp_t("В строке символов меньше нужного, так что считали все");
         a.len = i;
-        outp_n("Количество символов: ", a.len);
     }
+    
 
 
-    if (!file.eof()) return true;
+    return true;
 }
 
 bool out_file_check() {
@@ -197,10 +201,10 @@ int main() {
     strm string;
     char c;
 
-    while (! file.eof()) {
-            outp_n("-------------- Номер строки: ", lineNumber);
-            if (readLine(file, string)) process(string);
-            lineNumber++;
+    while (file.peek() != EOF) {
+        outp_n("-------------- Номер строки: ", lineNumber);
+        if (readLine(file, string)) process(string);
+        lineNumber++;
     }
 
     file.close();
