@@ -125,9 +125,8 @@ bool readLine(std::ifstream& file, strm& a) {
 
     // Проверка диапазона [0, N]
     if (number > N) {
-        outp_t("Ошибка: число > N");
-        skipToNextLine(file);
-        return 0;
+        outp_t("Ошибка: число > N, так что читаем только первые N символов");
+        number = N;
     }
 
     // Читаем строку до ограничителя
