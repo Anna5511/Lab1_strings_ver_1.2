@@ -98,7 +98,9 @@ bool readLine(std::ifstream& file, strm& a) {
             break;
         }
     }
-
+    if (!(c >= '0' && c <= '9')) {
+        file.seekg(-1, std::ios::cur);
+    }
     //не совершили j++ => не записали ничего в массив
     if (j == 0) {
         outp_t("Ошибка: нет числа");
@@ -150,6 +152,7 @@ bool readLine(std::ifstream& file, strm& a) {
             break;
         }
     }
+    std::cout << i << " " << number << std::endl << "-------" << std::endl;
     if (i == 0) {
         outp_t("В строке нет символов");
         return false;
