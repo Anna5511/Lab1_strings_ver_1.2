@@ -83,7 +83,7 @@ bool readLine(std::ifstream& file, strm& a) {
     
     //Дальше идет считывание числа - количество читаемых символов из строки
     int j = 0;
-    while (file.get(c) && j <= 2) {
+    while (j <= 2 && file.get(c)) {
         if (c >= '0' && c <= '9') {
             num[j] = c;
             j++;
@@ -98,9 +98,7 @@ bool readLine(std::ifstream& file, strm& a) {
             break;
         }
     }
-    if (!(c >= '0' && c <= '9')) {
-        file.seekg(-1, std::ios::cur);
-    }
+
     //не совершили j++ => не записали ничего в массив
     if (j == 0) {
         outp_t("Ошибка: нет числа");
