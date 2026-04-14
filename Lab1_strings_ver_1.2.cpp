@@ -54,7 +54,6 @@ void process(strm& a) {
     int pos_count = a.len / 2;
     outp_n("Сколько раз свапаем : ", pos_count);
     outp_n("Длина свапаемой строки : ", a.len);
-    outp("Строка до свапа : ", ' ', a);
     for (int i = 0; i < pos_count; i++) swap(a);
     outp("Результат : ", ' ', a);
 }
