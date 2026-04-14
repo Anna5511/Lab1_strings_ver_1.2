@@ -148,7 +148,6 @@ bool readLine(std::ifstream& file, strm& a) {
             break;
         }
     }
-    std::cout << i << " " << number << std::endl << "-------" << std::endl;
     if (i == 0) {
         outp_t("В строке нет символов");
         return false;
