@@ -69,11 +69,11 @@ bool readLine(std::ifstream& file, strm& a) {
     char stop;
     // Читаем ограничитель
     if (!file.get(stop)) {
-        outp_t("Ошибка: Пустой входной файл");
+        outp_t("Ошибка: Пусто");
         return false;
     }
     if (stop == '\n') {
-        outp_t("Ошибка: Пустая строка (нет ограничителя)");
+        outp_t("Ошибка: Пусто");
         return false;
     }
     outp("Ограничитель : ", stop, a);
@@ -201,7 +201,7 @@ int main() {
     strm string;
     char c;
 
-    while (file.peek() != EOF) {
+    while (!file.eof()) {
         outp_n("-------------- Номер строки: ", lineNumber);
         if (readLine(file, string)) process(string);
         lineNumber++;
